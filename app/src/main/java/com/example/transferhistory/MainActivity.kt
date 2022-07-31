@@ -20,7 +20,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
 
-
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,8 +129,8 @@ class MainActivity : ComponentActivity() {
                         .layoutId("btnGO"),
                     onClick = {
                         val intent = Intent(this, DisplayActivity::class.java)
-                        if(!text.toString().isEmpty()){
-                            intent.putExtra("url", text.toString())
+                        if(text.toString().isNotEmpty()){
+                            intent.putExtra("url", text.text)
                             startActivity(intent)
                         }
                     },
