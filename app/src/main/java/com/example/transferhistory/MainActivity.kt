@@ -1,5 +1,6 @@
 package com.example.transferhistory
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -128,7 +129,11 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier
                         .layoutId("btnGO"),
                     onClick = {
-                        //your onclick code
+                        val intent = Intent(this, DisplayActivity::class.java)
+                        if(!text.toString().isEmpty()){
+                            intent.putExtra("url", text.toString())
+                            startActivity(intent)
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = Color(
