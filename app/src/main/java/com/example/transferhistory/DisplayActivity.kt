@@ -3,6 +3,13 @@ package com.example.transferhistory
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import java.io.IOException
 import java.util.concurrent.Executors
 import org.jsoup.Jsoup
@@ -11,6 +18,7 @@ import org.jsoup.select.Elements
 
 class DisplayActivity : ComponentActivity() {
 
+    var isLoading = true
     var year = mutableListOf<String>()
     var team = mutableListOf<String>()
     var teamImage = mutableListOf<String>()
@@ -21,7 +29,11 @@ class DisplayActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val url = intent.getStringExtra("url")
 
-        Log.i("TAG", "Loading...")
+        setContent {
+            CircularIndeterminateProgressBar(isLoading)
+        }
+
+        Log.i("TEST", "Loading...")
 
         val executor = Executors.newSingleThreadExecutor()
         executor.execute {
@@ -32,7 +44,7 @@ class DisplayActivity : ComponentActivity() {
             try {
                 document = Jsoup.connect(url!!).get()
             } catch (e: IOException){
-                Log.i("TAG","Error")
+                Log.i("TEST","Error")
             }
 
             var elements : Elements = document.getElementsByClass("tm-player-transfer-history-grid__date")
@@ -52,6 +64,7 @@ class DisplayActivity : ComponentActivity() {
                     flag = false
                     continue
                 }
+                //if(element.text() != "Without Club" && element.text() != "Career break" && element.text() != "Ban" && element.text() != "Unknown")
                 team.add(element.text())
             }
 
@@ -65,17 +78,15 @@ class DisplayActivity : ComponentActivity() {
                 try {
                     document2 = Jsoup.connect("https://www.transfermarkt.com${element.attr("href")}").get()
                 } catch (e: IOException){
-                    Log.i("TAG","Error")
+                    Log.i("TEST","Error")
                 }
 
                 var elements2 = document2.getElementsByClass("dataBild").select("img")
                 var imageUrl : String
                 for(element in elements2){
                     imageUrl = element.attr("src")
-                    if(imageUrl!="")
-                        teamImage.add(imageUrl)
+                    teamImage.add(imageUrl)
                 }
-
             }
 
             elements = document.getElementsByClass("tm-player-transfer-history-grid__new-club").select("img")
@@ -100,11 +111,49 @@ class DisplayActivity : ComponentActivity() {
                 else
                     transerType.add("TRANSFER")
             }
-            Log.i("TAG", year.toString())
-            Log.i("TAG", team.toString())
-            Log.i("TAG", teamImage.toString())
-            Log.i("TAG", countryImage.toString())
-            Log.i("TAG", transerType.toString())
+            transerType.removeLast()
+
+            year.reverse()
+            team.reverse()
+            teamImage.reverse()
+            countryImage.reverse()
+            transerType.reverse()
+            
+            for(i in 0..year.size-2){
+                if(year[i] != year[i+1])
+                    year[i] = year[i] + "-" + year[i+1]
+                //Log.i("TEST", year[i] + "-" + year[i+1])
+            }
+            if(team.last().equals("Retired"))
+                //Log.i("TEST", year.last())
+            else{
+                //Log.i("TEST", year.last() + "-")
+                year[year.size-1] = year.last() + "-"
+            }
+
+            Log.i("TEST", year.toString())
+            Log.i("TEST", team.toString())
+            Log.i("TEST", teamImage.toString())
+            Log.i("TEST", countryImage.toString())
+            Log.i("TEST", transerType.toString())
+            isLoading = false
+        }
+    }
+}
+@Composable
+fun CircularIndeterminateProgressBar(isDisplayed: Boolean){
+    if(isDisplayed){
+        Row (
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(50.dp),
+            horizontalArrangement = Arrangement.Center
+        ){
+            if(isDisplayed){
+                CircularProgressIndicator(
+                    color = Color.Red
+                )
+            }
         }
     }
 }
