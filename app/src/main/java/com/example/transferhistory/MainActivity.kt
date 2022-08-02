@@ -237,15 +237,27 @@ class MainActivity : ComponentActivity() {
 
                                 for(i in 0..year.size-2){
                                     if(transerType[i] == "END OF LOAN"){
-                                        year[i-2] = year[i-2].dropLast(4) + year[i+1]
+                                        var j = 2
+
+                                        while(transerType[i-j] == "END OF LOAN")
+                                            j += 2
+
+                                        if(year[i-j].length>4)
+                                            year[i-j] = year[i-j].dropLast(4) + year[i+1]
+                                        else
+                                            year[i-j] = year[i-j] + "-" + year[i+1]
                                     }
                                     else{
                                         if(year[i] != year[i+1])
                                             year[i] = year[i] + "-" + year[i+1]
                                     }
                                 }
-                                if(transerType.last() == "END OF LOAN")
-                                    year[year.size-3] = year[year.size-3] + "-"
+                                if(transerType.last() == "END OF LOAN"){
+                                    if(year[year.size-3].length>4)
+                                        year[year.size-3] = year[year.size-3].dropLast(4)
+                                    else
+                                        year[year.size-3] = year[year.size-3] + "-"
+                                }
                                 else{
                                     if(team.last() != "Retired")
                                         year[year.size-1] = year.last() + "-"
