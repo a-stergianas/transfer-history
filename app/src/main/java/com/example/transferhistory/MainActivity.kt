@@ -29,7 +29,6 @@ import java.io.Serializable
 
 class MainActivity : ComponentActivity() {
 
-    var isLoading = true
     var year = mutableListOf<String>()
     var team = mutableListOf<String>()
     var teamImage = mutableListOf<String>()
@@ -145,6 +144,12 @@ class MainActivity : ComponentActivity() {
                     onClick = {
                         if(text.text.isNotEmpty()){
 
+                            year.clear()
+                            team.clear()
+                            teamImage.clear()
+                            countryImage.clear()
+                            transerType.clear()
+
                             val executor = Executors.newSingleThreadExecutor()
                             executor.execute {
                                 Log.i("TEST", "Loading...")
@@ -192,10 +197,10 @@ class MainActivity : ComponentActivity() {
                                         Log.i("TEST","Error")
                                     }
 
-                                    var elements2 = document2.getElementsByClass("dataBild").select("img")
+                                    val elements2 = document2.getElementsByClass("dataBild").select("img")
                                     var imageUrl : String
-                                    for(element in elements2){
-                                        imageUrl = element.attr("src")
+                                    for(element2 in elements2){
+                                        imageUrl = element2.attr("src")
                                         teamImage.add(imageUrl)
                                     }
                                 }
@@ -231,12 +236,19 @@ class MainActivity : ComponentActivity() {
                                 transerType.reverse()
 
                                 for(i in 0..year.size-2){
-                                    if(year[i] != year[i+1])
-                                        year[i] = year[i] + "-" + year[i+1]
+                                    if(transerType[i] == "END OF LOAN"){
+                                        year[i-2] = year[i-2].dropLast(4) + year[i+1]
+                                    }
+                                    else{
+                                        if(year[i] != year[i+1])
+                                            year[i] = year[i] + "-" + year[i+1]
+                                    }
                                 }
-                                if(team.last().equals("Retired"))
+                                if(transerType.last() == "END OF LOAN")
+                                    year[year.size-3] = year[year.size-3] + "-"
                                 else{
-                                    year[year.size-1] = year.last() + "-"
+                                    if(team.last() != "Retired")
+                                        year[year.size-1] = year.last() + "-"
                                 }
 
                                 Log.i("TEST", year.toString())
