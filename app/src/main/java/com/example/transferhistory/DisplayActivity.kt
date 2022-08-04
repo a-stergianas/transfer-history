@@ -3,15 +3,11 @@ package com.example.transferhistory
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Rect
 import android.os.Bundle
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,17 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
 import java.io.IOException
 
 
@@ -38,26 +28,27 @@ class DisplayActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val name: String = intent.getStringExtra("name") as String
         val year: MutableList<String>  = intent.getSerializableExtra("year") as MutableList<String>
         val team: MutableList<String>  = intent.getSerializableExtra("team") as MutableList<String>
         val teamImage: MutableList<String>  = intent.getSerializableExtra("teamImage") as MutableList<String>
         val countryImage: MutableList<String>  = intent.getSerializableExtra("countryImage") as MutableList<String>
-        val transerType: MutableList<String>  = intent.getSerializableExtra("transerType") as MutableList<String>
+        val transferType: MutableList<String>  = intent.getSerializableExtra("transferType") as MutableList<String>
 
         setContent {
-            DisplayComposable(year,team,teamImage,countryImage,transerType)
+            DisplayComposable(name,year,team,teamImage,countryImage,transferType)
         }
     }
-
 }
 
 @Composable
 fun DisplayComposable(
+    name: String,
     year: MutableList<String>,
     team: MutableList<String>,
     teamImage: MutableList<String>,
     countryImage: MutableList<String>,
-    transerType: MutableList<String>
+    transferType: MutableList<String>
 ){
     val scrollState = rememberScrollState()
     Column(
@@ -68,8 +59,10 @@ fun DisplayComposable(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         var imageCounter = 0
+        var rowCounter = 0
         for(i in 0 until year.size){
-            if(transerType[i] != "END OF LOAN"){
+            if(transferType[i] != "END OF LOAN"){
+                rowCounter += 1
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -79,20 +72,19 @@ fun DisplayComposable(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = year.get(i),
+                        text = year[i],
                         Modifier.width(80.dp),
                         fontSize = 15.sp
                     )
-                    if(transerType.get(i) == "LOAN"){
+                    if(transferType[i] == "LOAN"){
                         Image(painterResource(id = R.drawable.arrows),
                             contentDescription = "loan arrows",
                             modifier = Modifier.size(40.dp))
-                        //Spacer(modifier = Modifier.width(4.dp))
                     }
 
-                    if(team.get(i) != "Without Club" && team.get(i) != "Career break" && team.get(i) != "Ban" && team.get(i) != "Unknown" && team.get(i) != "Retired"){
+                    if(team[i] != "Without Club" && team[i] != "Career break" && team[i] != "Ban" && team[i] != "Unknown" && team[i] != "Retired"){
                         Image(painter = rememberAsyncImagePainter(teamImage[imageCounter]),
-                            contentDescription = team.get(i),
+                            contentDescription = team[i],
                             modifier = Modifier
                                 .width(40.dp)
                                 .height(40.dp))
@@ -115,33 +107,18 @@ fun DisplayComposable(
                                     .padding(8.dp),
                             )
                         }
-                        if(transerType[i] == "LOAN")
-                            imageCounter += 2
+                        imageCounter += if(transferType[i] == "LOAN")
+                            2
                         else
-                            imageCounter += 1
+                            1
                     }
-                    Text(text = team.get(i), fontSize = 15.sp)
-                    if(transerType.get(i) == "LOAN")
+                    Text(text = team[i], fontSize = 15.sp)
+                    if(transferType[i] == "LOAN")
                         Text(text = "(loan)",Modifier.padding(horizontal = 4.dp), fontSize = 15.sp)
                 }
             }
         }
-
-        Button(
-            modifier = Modifier
-                .layoutId("saveImage"),
-            onClick = {
-
-            },
-            colors = ButtonDefaults.buttonColors(
-                contentColor = Color(
-                    android.graphics.Color.parseColor("#133355")
-                ),
-                backgroundColor = Color.White
-            )
-        ) {
-            Text("Save Image")
-        }
+        Text("$name ($rowCounter)", color = Color.White, fontSize = 16.sp, modifier = Modifier.padding(vertical = 4.dp))
     }
 }
 

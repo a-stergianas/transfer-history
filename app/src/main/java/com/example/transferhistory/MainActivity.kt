@@ -29,15 +29,16 @@ import java.io.Serializable
 
 class MainActivity : ComponentActivity() {
 
-    var year = mutableListOf<String>()
-    var team = mutableListOf<String>()
-    var teamImage = mutableListOf<String>()
-    var countryImage = mutableListOf<String>()
-    var transerType = mutableListOf<String>()
+    private var year = mutableListOf<String>()
+    private var team = mutableListOf<String>()
+    private var teamImage = mutableListOf<String>()
+    private var countryImage = mutableListOf<String>()
+    private var transferType = mutableListOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
             val constraints = ConstraintSet {
                 val logo = createRefFor("logo")
                 val textField = createRefFor("textField")
@@ -144,15 +145,15 @@ class MainActivity : ComponentActivity() {
                     onClick = {
                         if(text.text.isNotEmpty()){
 
+                            var name: String
                             year.clear()
                             team.clear()
                             teamImage.clear()
                             countryImage.clear()
-                            transerType.clear()
+                            transferType.clear()
 
                             val executor = Executors.newSingleThreadExecutor()
                             executor.execute {
-                                Log.i("TEST", "Loading...")
                                 var document = Document(null)
                                 var document2 = Document(null)
                                 var flag : Boolean
@@ -163,7 +164,15 @@ class MainActivity : ComponentActivity() {
                                     Log.i("TEST","Error")
                                 }
 
-                                var elements : Elements = document.getElementsByClass("tm-player-transfer-history-grid__date")
+                                var elements : Elements = document.getElementsByClass("data-header__headline-wrapper")
+                                name = elements.text()
+                                if(name[0] == '#'){
+                                    while(name[0] != ' ')
+                                        name = name.drop(1)
+                                    name = name.drop(1)
+                                }
+
+                                elements = document.getElementsByClass("tm-player-transfer-history-grid__date")
                                 flag = true
                                 for(element in elements){
                                     if (flag){
@@ -180,37 +189,7 @@ class MainActivity : ComponentActivity() {
                                         flag = false
                                         continue
                                     }
-                                    //if(element.text() != "Without Club" && element.text() != "Career break" && element.text() != "Ban" && element.text() != "Unknown")
                                     team.add(element.text())
-                                }
-
-                                elements = document.getElementsByClass("tm-player-transfer-history-grid__club-link")
-                                flag = false
-                                for(element in elements){
-                                    flag = !flag
-                                    if(flag)
-                                        continue
-
-                                    try {
-                                        document2 = Jsoup.connect("https://www.transfermarkt.com${element.attr("href")}").get()
-                                    } catch (e: IOException){
-                                        Log.i("TEST","Error")
-                                    }
-
-                                    val elements2 = document2.getElementsByClass("dataBild").select("img")
-                                    var imageUrl : String
-                                    for(element2 in elements2){
-                                        imageUrl = element2.attr("src")
-                                        teamImage.add(imageUrl)
-                                    }
-                                }
-
-                                elements = document.getElementsByClass("tm-player-transfer-history-grid__new-club").select("img")
-                                var countryImageUrl : String
-                                for(element in elements){
-                                    countryImageUrl = element.attr("data-src")
-                                    if(countryImageUrl!="")
-                                        countryImage.add(countryImageUrl.drop(52).dropLast(14))
                                 }
 
                                 elements = document.getElementsByClass("tm-player-transfer-history-grid__fee")
@@ -221,25 +200,58 @@ class MainActivity : ComponentActivity() {
                                         continue
                                     }
                                     if (element.text() == "End of loan")
-                                        transerType.add("END OF LOAN")
+                                        transferType.add("END OF LOAN")
                                     else if (element.text().contains("loan") or element.text().contains("Loan"))
-                                        transerType.add("LOAN")
+                                        transferType.add("LOAN")
                                     else
-                                        transerType.add("TRANSFER")
+                                        transferType.add("TRANSFER")
                                 }
-                                transerType.removeLast()
+                                transferType.removeLast()
+
+                                elements = document.getElementsByClass("tm-player-transfer-history-grid__club-link")
+                                flag = false
+                                var counter = 0
+                                for(element in elements){
+                                    flag = !flag
+                                    if(flag)
+                                        continue
+                                    if(transferType[counter] == "END OF LOAN")
+                                        teamImage.add(teamImage[counter-2])
+                                    else{
+                                        try {
+                                            document2 = Jsoup.connect("https://www.transfermarkt.com${element.attr("href")}").get()
+                                        } catch (e: IOException){
+                                            Log.i("TEST","Error")
+                                        }
+
+                                        val elements2 = document2.getElementsByClass("dataBild").select("img")
+                                        var imageUrl : String
+                                        for(element2 in elements2){
+                                            imageUrl = element2.attr("src")
+                                            teamImage.add(imageUrl)
+                                        }
+                                    }
+                                    counter += 1
+                                }
+
+                                elements = document.getElementsByClass("tm-player-transfer-history-grid__new-club").select("img")
+                                var countryImageUrl : String
+                                for(element in elements){
+                                    countryImageUrl = element.attr("data-src")
+                                    if(countryImageUrl!="")
+                                        countryImage.add(countryImageUrl.drop(52).dropLast(14))
+                                }
 
                                 year.reverse()
                                 team.reverse()
                                 teamImage.reverse()
                                 countryImage.reverse()
-                                transerType.reverse()
+                                transferType.reverse()
 
                                 for(i in 0..year.size-2){
-                                    if(transerType[i] == "END OF LOAN"){
+                                    if(transferType[i] == "END OF LOAN"){
                                         var j = 2
-
-                                        while(transerType[i-j] == "END OF LOAN")
+                                        while(transferType[i-j] == "END OF LOAN")
                                             j += 2
 
                                         if(year[i-j].length>4)
@@ -252,7 +264,7 @@ class MainActivity : ComponentActivity() {
                                             year[i] = year[i] + "-" + year[i+1]
                                     }
                                 }
-                                if(transerType.last() == "END OF LOAN"){
+                                if(transferType.last() == "END OF LOAN"){
                                     if(year[year.size-3].length>4)
                                         year[year.size-3] = year[year.size-3].dropLast(4)
                                     else
@@ -263,21 +275,15 @@ class MainActivity : ComponentActivity() {
                                         year[year.size-1] = year.last() + "-"
                                 }
 
-                                Log.i("TEST", year.toString())
-                                Log.i("TEST", team.toString())
-                                Log.i("TEST", teamImage.toString())
-                                Log.i("TEST", countryImage.toString())
-                                Log.i("TEST", transerType.toString())
-
                                 val intent = Intent(this, DisplayActivity::class.java)
+                                intent.putExtra("name", name)
                                 intent.putExtra("year", year as Serializable)
-                                intent.putStringArrayListExtra("team", (ArrayList<String>(team)))
-                                intent.putStringArrayListExtra("teamImage", (ArrayList<String>(teamImage)))
-                                intent.putStringArrayListExtra("countryImage", (ArrayList<String>(countryImage)))
-                                intent.putStringArrayListExtra("transerType", (ArrayList<String>(transerType)))
+                                intent.putExtra("team", team as Serializable)
+                                intent.putExtra("teamImage", teamImage as Serializable)
+                                intent.putExtra("countryImage", countryImage as Serializable)
+                                intent.putExtra("transferType", transferType as Serializable)
                                 startActivity(intent)
                             }
-
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
