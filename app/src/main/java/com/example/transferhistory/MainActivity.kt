@@ -216,7 +216,7 @@ class MainActivity : ComponentActivity() {
                                     if(flag)
                                         continue
                                     if(transferType[counter] == "END OF LOAN")
-                                        teamImage.add(teamImage[counter-2])
+                                        teamImage.add("https://www.transfermarkt.com${element.attr("href")}")
                                     else{
                                         try {
                                             document2 = Jsoup.connect("https://www.transfermarkt.com${element.attr("href")}").get()
@@ -240,6 +240,26 @@ class MainActivity : ComponentActivity() {
                                     countryImageUrl = element.attr("data-src")
                                     if(countryImageUrl!="")
                                         countryImage.add(countryImageUrl.drop(52).dropLast(14))
+                                }
+
+                                if(transferType.last() == "LOAN"){
+                                    year.add("?")                       // ΑΝ ΞΕΡΩ ΧΡΟΝΙΑ ΤΗΝ ΒΑΖΩ ΕΔΩ
+                                    team.add(team[team.size-2])
+                                    countryImage.add(countryImage[countryImage.size-2])
+                                    transferType.add("TRANSFER")
+
+                                    try {
+                                        document2 = Jsoup.connect(teamImage[teamImage.size-2]).get()
+                                    } catch (e: IOException){
+                                        Log.i("TEST","Error")
+                                    }
+
+                                    val elements2 = document2.getElementsByClass("dataBild").select("img")
+                                    var imageUrl : String
+                                    for(element2 in elements2){
+                                        imageUrl = element2.attr("src")
+                                        teamImage.add(imageUrl)
+                                    }
                                 }
 
                                 year.reverse()
