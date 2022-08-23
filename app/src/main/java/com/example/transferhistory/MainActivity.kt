@@ -15,8 +15,12 @@ import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
@@ -38,6 +42,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+
+            val (showDialog, setShowDialog) =  remember { mutableStateOf(false) }
 
             val constraints = ConstraintSet {
                 val logo = createRefFor("logo")
@@ -144,6 +150,8 @@ class MainActivity : ComponentActivity() {
                         .layoutId("btnGO"),
                     onClick = {
                         if(text.text.isNotEmpty()){
+
+                            setShowDialog(true)
 
                             var name: String
                             year.clear()
@@ -302,6 +310,7 @@ class MainActivity : ComponentActivity() {
                                 intent.putExtra("teamImage", teamImage as Serializable)
                                 intent.putExtra("countryImage", countryImage as Serializable)
                                 intent.putExtra("transferType", transferType as Serializable)
+                                setShowDialog(false)
                                 startActivity(intent)
                             }
                         }
@@ -315,6 +324,42 @@ class MainActivity : ComponentActivity() {
                 ){
                     Text("GO")
                 }
+            }
+
+            LoadingDialog(
+                showDialog,
+            )
+        }
+    }
+}
+
+
+@Composable
+fun LoadingDialog(
+    showDialog: Boolean
+) {
+    if (showDialog) {
+        Dialog(
+            onDismissRequest = {
+            },
+            properties = DialogProperties(
+                dismissOnClickOutside = false,
+                dismissOnBackPress = false,
+            )
+        ) {
+            Card(
+                elevation = 8.dp,
+            ) {
+                Text(
+                    text = "Loading... Please wait.",
+                    fontWeight = FontWeight.Bold,
+                    color = Color(
+                        android.graphics.Color.parseColor("#133355")),
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
+                )
             }
         }
     }
