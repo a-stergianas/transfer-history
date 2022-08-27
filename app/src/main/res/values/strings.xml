@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Transfer History</string>
     <string name="title_activity_display">DisplayActivity</string>
+    <string name="title_activity_display_starting_lineup">DisplayStartingLineupActivity</string>
 </resources>

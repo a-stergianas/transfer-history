@@ -21,10 +21,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.transferhistory.ui.theme.tm_blue
+import com.example.transferhistory.ui.theme.tm_grey
 import java.io.IOException
 
 
-class DisplayActivity : ComponentActivity() {
+class DisplayTransferHistoryActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,13 +38,13 @@ class DisplayActivity : ComponentActivity() {
         val transferType: MutableList<String>  = intent.getSerializableExtra("transferType") as MutableList<String>
 
         setContent {
-            DisplayComposable(name,year,team,teamImage,countryImage,transferType)
+            DisplayTransferHistoryComposable(name,year,team,teamImage,countryImage,transferType)
         }
     }
 }
 
 @Composable
-fun DisplayComposable(
+fun DisplayTransferHistoryComposable(
     name: String,
     year: MutableList<String>,
     team: MutableList<String>,
@@ -54,7 +56,7 @@ fun DisplayComposable(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(android.graphics.Color.parseColor("#133355")))
+            .background(tm_blue)
             .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -66,8 +68,8 @@ fun DisplayComposable(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(45.dp)
-                        .background(Color(android.graphics.Color.parseColor("#E6E6E6")))
+                        .height(40.dp)
+                        .background(tm_grey)
                         .padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -86,8 +88,9 @@ fun DisplayComposable(
                         Image(painter = rememberAsyncImagePainter(teamImage[imageCounter]),
                             contentDescription = team[i],
                             modifier = Modifier
-                                .width(40.dp)
-                                .height(40.dp))
+                                .size(35.dp)
+                                .padding(0.dp)
+                        )
 
                         val context = LocalContext.current
                         val imageBitmap = remember {
@@ -103,8 +106,8 @@ fun DisplayComposable(
                                 contentDescription = null,
                                 contentScale = ContentScale.Fit,
                                 modifier = Modifier
-                                    .size(40.dp)
-                                    .padding(8.dp),
+                                    .width(45.dp)
+                                    .padding(0.dp),
                             )
                         }
                         imageCounter += if(transferType[i] == "LOAN")
