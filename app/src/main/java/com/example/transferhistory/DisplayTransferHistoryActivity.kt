@@ -85,7 +85,7 @@ fun DisplayTransferHistoryComposable(
                     }
 
                     if(team[i] != "Without Club" && team[i] != "Career break" && team[i] != "Ban" && team[i] != "Unknown" && team[i] != "Retired"){
-                        Image(painter = rememberAsyncImagePainter(teamImage[imageCounter]),
+                        Image(painter = rememberAsyncImagePainter(teamImage[i]),
                             contentDescription = team[i],
                             modifier = Modifier
                                 .size(35.dp)
@@ -110,6 +110,7 @@ fun DisplayTransferHistoryComposable(
                                     .padding(0.dp),
                             )
                         }
+
                         imageCounter += if(transferType[i] == "LOAN")
                             2
                         else

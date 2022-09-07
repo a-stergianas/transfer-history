@@ -166,7 +166,7 @@ class MainActivity : ComponentActivity() {
                                     Log.i("TEST","Error")
                                 }
 
-                                if(text.text.take(42) == "https://www.transfermarkt.com/spielbericht"){
+                                if(text.text.drop(30).dropWhile { it != '/' }.take(16) != "/profil/spieler/"){
 
                                     var elements : Elements = document.getElementsByClass("sb-vereinslink")
 
@@ -378,6 +378,19 @@ class MainActivity : ComponentActivity() {
                                     }
                                     transferType.removeLast()
 
+                                    elements = document.getElementsByClass("tm-player-transfer-history-grid__new-club").select("img")
+                                    var imageUrl : String
+                                    for(element2 in elements){
+                                        imageUrl = element2.attr("data-srcset")
+                                            .dropWhile { it.isWhitespace() }
+                                            .dropLastWhile { it != ',' }
+                                            .dropLast(4)
+
+                                        if(imageUrl.take(42).takeLast(7) == "wappen/")
+                                            teamImage.add(imageUrl.take(42) + "normquad/" + imageUrl.takeLastWhile { it != '/' })
+                                    }
+
+                                    /*
                                     elements = document.getElementsByClass("tm-player-transfer-history-grid__club-link")
                                     flag = false
                                     var counter = 0
@@ -412,6 +425,7 @@ class MainActivity : ComponentActivity() {
                                         }
                                         counter ++
                                     }
+                                     */
 
                                     elements = document.getElementsByClass("tm-player-transfer-history-grid__new-club").select("img")
                                     var countryImageUrl : String
@@ -427,13 +441,16 @@ class MainActivity : ComponentActivity() {
                                         countryImage.add(countryImage[countryImage.size-2])
                                         transferType.add("TRANSFER")
 
+                                        teamImage.add(teamImage.get(teamImage.size-2))
+                                        /*
                                         try {
                                             document2 = Jsoup.connect(teamImage[teamImage.size-2]).get()
                                         } catch (e: IOException){
                                             Log.i("TEST","Error")
                                         }
 
-                                        val elements2 = document2.getElementsByClass("dataBild").select("img")
+                                        val elements2 = document2.getElementsByClass("dataBild")
+                                            .select("img")
                                         var imageUrl : String
                                         for(element2 in elements2){
                                             imageUrl = element2.attr("src").dropLast(14)
@@ -448,6 +465,7 @@ class MainActivity : ComponentActivity() {
                                             }
                                             teamImage.add("https://tmssl.akamaized.net/images/wappen/big$imageUrl")
                                         }
+                                         */
                                     }
 
                                     year.reverse()
