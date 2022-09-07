@@ -12,12 +12,13 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
@@ -30,7 +31,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.transferhistory.ui.theme.tm_blue
 import com.example.transferhistory.ui.theme.tm_grey
 import java.io.IOException
-
 
 var newColor = "#133355"
 
@@ -47,17 +47,12 @@ class DisplayStartingLineupActivity : ComponentActivity() {
         val homeBadge: String = intent.getStringExtra("homeBadge") as String
         val awayBadge: String = intent.getStringExtra("awayBadge") as String
         val score: String = intent.getStringExtra("score") as String
+        val extraTimeOrPenalties: String = intent.getStringExtra("extraTimeOrPenalties") as String
         val competition: String = intent.getStringExtra("competition") as String
         val stage: String = intent.getStringExtra("stage") as String
         val date: String = intent.getStringExtra("date") as String
         val stadium: String = intent.getStringExtra("stadium") as String
         var colorToChange = 1
-
-        //val year: MutableList<String>  = intent.getSerializableExtra("year") as MutableList<String>
-        //val team: MutableList<String>  = intent.getSerializableExtra("team") as MutableList<String>
-        //val teamImage: MutableList<String>  = intent.getSerializableExtra("teamImage") as MutableList<String>
-        //val countryImage: MutableList<String>  = intent.getSerializableExtra("countryImage") as MutableList<String>
-        //val transferType: MutableList<String>  = intent.getSerializableExtra("transferType") as MutableList<String>
 
         setContent {
 
@@ -97,13 +92,34 @@ class DisplayStartingLineupActivity : ComponentActivity() {
                                 horizontalArrangement = Arrangement.SpaceAround
                             ) {
 
-                                Image(
-                                    painter = rememberAsyncImagePainter(homeBadge),
-                                    contentDescription = "home badge",
-                                    modifier = Modifier
-                                        .size(50.dp)
-                                        .padding(5.dp)
-                                )
+                                if(homeBadge.take(5) == "https"){
+                                    Image(
+                                        painter = rememberAsyncImagePainter(homeBadge),
+                                        contentDescription = "home badge",
+                                        modifier = Modifier
+                                            .size(50.dp)
+                                            .padding(5.dp)
+                                    )
+                                }
+                                else{
+                                    val context = LocalContext.current
+                                    val imageBitmap = remember {
+                                        mutableStateOf<ImageBitmap?>(null)
+                                    }
+                                    val bitmap: Bitmap? = context.assetsToBitmap("flags/" + homeBadge)
+                                    bitmap?.apply {
+                                        imageBitmap.value = this.asImageBitmap()
+                                    }
+                                    imageBitmap.value?.apply {
+                                        Image(
+                                            bitmap = this,
+                                            contentDescription = "home badge",
+                                            modifier = Modifier
+                                                .size(50.dp)
+                                                .padding(5.dp)
+                                        )
+                                    }
+                                }
 
                                 Text(
                                     text = homeTeam,
@@ -114,14 +130,27 @@ class DisplayStartingLineupActivity : ComponentActivity() {
                                     textAlign = TextAlign.Start
                                 )
 
-                                Text(
-                                    text = score,
-                                    fontSize = 24.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    modifier = Modifier
-                                        .width(50.dp),
-                                    textAlign = TextAlign.Center
-                                )
+                                Column {
+                                    Text(
+                                        text = score,
+                                        fontSize = 24.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        modifier = Modifier
+                                            .width(60.dp),
+                                        textAlign = TextAlign.Center
+                                    )
+
+                                    if(extraTimeOrPenalties != ""){
+                                        Text(
+                                            text = extraTimeOrPenalties,
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.ExtraBold,
+                                            modifier = Modifier
+                                                .width(60.dp),
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
+                                }
 
                                 Text(text = awayTeam,
                                     fontSize = 16.sp,
@@ -131,16 +160,70 @@ class DisplayStartingLineupActivity : ComponentActivity() {
                                     textAlign = TextAlign.End
                                 )
 
-                                Image(
-                                    painter = rememberAsyncImagePainter(awayBadge),
-                                    contentDescription = "away badge",
-                                    modifier = Modifier
-                                        .size(50.dp)
-                                        .padding(5.dp)
-                                )
+                                if(awayBadge.take(5) == "https"){
+                                    Image(
+                                        painter = rememberAsyncImagePainter(awayBadge),
+                                        contentDescription = "away badge",
+                                        modifier = Modifier
+                                            .size(50.dp)
+                                            .padding(5.dp)
+                                    )
+                                }
+                                else{
+                                    val context = LocalContext.current
+                                    val imageBitmap = remember {
+                                        mutableStateOf<ImageBitmap?>(null)
+                                    }
+                                    val bitmap: Bitmap? = context.assetsToBitmap("flags/" + awayBadge)
+                                    bitmap?.apply {
+                                        imageBitmap.value = this.asImageBitmap()
+                                    }
+                                    imageBitmap.value?.apply {
+                                        Image(
+                                            bitmap = this,
+                                            contentDescription = "away badge",
+                                            modifier = Modifier
+                                                .size(50.dp)
+                                                .padding(5.dp)
+                                        )
+                                    }
+                                }
                             }
 
-                            Spacer(modifier = Modifier.height(16.dp))
+                            Canvas(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(380.dp)
+                                    .background(tm_grey)
+                            ) {
+
+                                val canvasWidth = size.width
+                                val canvasHeight = size.height
+
+                                drawImage(
+                                    image = ImageBitmap.imageResource(
+                                        res = resources,
+                                        id = R.drawable.field
+                                    )
+                                )
+
+                                drawCircle(
+                                    color = Color.Blue,
+                                    center = Offset(x = canvasWidth / 2, y = canvasHeight / 2),
+                                    radius = 12.dp.toPx()
+                                )
+
+                                drawArc(
+                                    Color.Red,
+                                    startAngle = 180f,
+                                    sweepAngle = 180f,
+                                    useCenter = true,
+                                    size = Size(24.dp.toPx(), 24.dp.toPx())
+                                )
+
+                            }
+
+                            Spacer(modifier = Modifier.height(20.dp))
 
                             if (selectedIndex.value == 0) {
                                 Row {
@@ -242,98 +325,19 @@ class DisplayStartingLineupActivity : ComponentActivity() {
                 showDialog,
                 setShowDialog,
                 onPositiveClick = {
-                    when (colorToChange) {
-                        1 -> homeColor1 = newColor
-                        2 -> homeColor2 = newColor
-                        3 -> awayColor1 = newColor
-                        4 -> awayColor2 = newColor
+                    if(newColor.length == 6) {
+                        when (colorToChange) {
+                            1 -> homeColor1 = newColor
+                            2 -> homeColor2 = newColor
+                            3 -> awayColor1 = newColor
+                            4 -> awayColor2 = newColor
+                        }
+                        setShowDialog(false)
                     }
-                    setShowDialog(false)
                 }
             )
             //DisplayStartingLineupComposable(name,year,team,teamImage,countryImage,transferType)
         }
-    }
-}
-
-@Composable
-fun DisplayStartingLineupComposable(
-    name: String,
-    year: MutableList<String>,
-    team: MutableList<String>,
-    teamImage: MutableList<String>,
-    countryImage: MutableList<String>,
-    transferType: MutableList<String>
-){
-    val scrollState = rememberScrollState()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(android.graphics.Color.parseColor("#133355")))
-            .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        var imageCounter = 0
-        var rowCounter = 0
-        for(i in 0 until year.size){
-            if(transferType[i] != "END OF LOAN"){
-                rowCounter += 1
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(45.dp)
-                        .background(Color(android.graphics.Color.parseColor("#E6E6E6")))
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = year[i],
-                        Modifier.width(80.dp),
-                        fontSize = 15.sp
-                    )
-                    if(transferType[i] == "LOAN"){
-                        Image(painterResource(id = R.drawable.arrows),
-                            contentDescription = "loan arrows",
-                            modifier = Modifier.size(40.dp))
-                    }
-
-                    if(team[i] != "Without Club" && team[i] != "Career break" && team[i] != "Ban" && team[i] != "Unknown" && team[i] != "Retired"){
-                        Image(painter = rememberAsyncImagePainter(teamImage[imageCounter]),
-                            contentDescription = team[i],
-                            modifier = Modifier
-                                .width(40.dp)
-                                .height(40.dp))
-
-                        val context = LocalContext.current
-                        val imageBitmap = remember {
-                            mutableStateOf<ImageBitmap?>(null)
-                        }
-                        val bitmap: Bitmap? = context.assetsToBitmap("flags/" + countryImage[imageCounter])
-                        bitmap?.apply {
-                            imageBitmap.value = this.asImageBitmap()
-                        }
-                        imageBitmap.value?.apply {
-                            Image(
-                                bitmap = this,
-                                contentDescription = null,
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .padding(8.dp),
-                            )
-                        }
-                        imageCounter += if(transferType[i] == "LOAN")
-                            2
-                        else
-                            1
-                    }
-                    Text(text = team[i], fontSize = 15.sp)
-                    if(transferType[i] == "LOAN")
-                        Text(text = "(loan)",Modifier.padding(horizontal = 4.dp), fontSize = 15.sp)
-                }
-            }
-        }
-        Text("$name ($rowCounter)", color = Color.White, fontSize = 16.sp, modifier = Modifier.padding(vertical = 4.dp))
     }
 }
 
@@ -385,7 +389,7 @@ fun ChangeColorDialog(
 
                     OutlinedTextField(
                         value = text,
-                        placeholder = { Text("e.g. 133355") },
+                        placeholder = { Text(text = "e.g. 133355") },
                         textStyle = TextStyle.Default.copy(fontSize = 16.sp),
                         colors = TextFieldDefaults.textFieldColors(
                             backgroundColor = Color.White,

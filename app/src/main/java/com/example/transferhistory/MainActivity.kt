@@ -245,22 +245,43 @@ class MainActivity : ComponentActivity() {
                                     var homeBadge = ""
                                     var awayBadge = ""
 
-                                    elements = document.getElementsByClass("sb-team sb-heim").select("img")
+                                    elements = document.getElementsByClass("unterueberschrift aufstellung-unterueberschrift-mannschaft")
+                                        .select("img")
                                     for (element in elements) {
                                         homeBadge = element.attr("src")
                                     }
 
-                                    elements = document.getElementsByClass("sb-team sb-gast").select("img")
+                                    if(homeBadge.drop(35).takeWhile { it != '/' } == "wappen"){
+                                        homeBadge = homeBadge.take(42) + "big/" + homeBadge.takeLastWhile { it != '/' }
+                                    }
+                                    else if(homeBadge.drop(35).takeWhile { it != '/' } == "flagge"){
+                                        homeBadge = homeBadge.takeLastWhile { it != '/' }.takeWhile { it != '?' }
+                                    }
+
+                                    elements = document.getElementsByClass("unterueberschrift aufstellung-unterueberschrift-mannschaft aufstellung-bordertop-small")
+                                        .select("img")
                                     for (element in elements) {
                                         awayBadge = element.attr("src")
                                     }
 
+                                    if(awayBadge.drop(35).takeWhile { it != '/' } == "wappen"){
+                                        awayBadge = awayBadge.take(42) + "big/" + awayBadge.takeLastWhile { it != '/' }
+                                    }
+                                    else if(awayBadge.drop(35).takeWhile { it != '/' } == "flagge"){
+                                        awayBadge = awayBadge.takeLastWhile { it != '/' }.takeWhile { it != '?' }
+                                    }
+
                                     elements = document.getElementsByClass("sb-endstand")
-                                    var score = elements.text().take(3)
-                                    score = score.take(1) + "-" + score.takeLast(1)
+                                    var score = elements.text().takeWhile { it != ' ' }
+                                    score = score.takeWhile { it != ':' } + "-" + score.takeLastWhile { it != ':'}
+
+
+                                    elements = document.getElementsByClass("sb-halbzeit")
+                                    val extraTimeOrPenalties = if(elements[0].text().last() != ')') elements[0].text() else ""
+
 
                                     elements = document.getElementsByClass("spielername-profil")
-                                    var competition = elements.text()
+                                    val competition = elements[0].text()
 
                                     elements = document.getElementsByClass("sb-datum hide-for-small")
                                     var stageAndDate = elements.text()
@@ -269,10 +290,14 @@ class MainActivity : ComponentActivity() {
                                     stageAndDate = stageAndDate.dropLast(2)
 
                                     var stage = stageAndDate.takeWhile { it != '|' }.dropLast(1)
-                                    var date = stageAndDate.drop(stage.length+3).takeWhile { it != '|' }.dropLastWhile { it == ' ' }
+                                    if(stage.takeLast(10) == ". Matchday")
+                                        stage = "Matchday " + stage.takeWhile { it != '.' }
+
+                                    var date = stageAndDate.drop(stage.length+3).takeWhile { it != '|' }.dropLastWhile { it == ' ' }.dropWhile { it == ' ' }
+                                    date = date.takeWhile { it != ',' } + ". " + date.dropWhile { it != '/' }.drop(1).takeWhile { it != '/' } + "/" + date.dropWhile { it != ' ' }.drop(1).dropLastWhile { it != '/' }.dropLast(1).dropLastWhile { it != '/' }.dropLast(1) + "/" + if(date.takeLast(2).toInt() >= 34) "19" else "20" + date.takeLast(2)
 
                                     elements = document.getElementsByClass("hide-for-small").select("a")
-                                    var stadium = elements[elements.size-3].text()
+                                    val stadium = elements[elements.size-3].text()
 
                                     elements = document.getElementsByClass("aufstellung-spieler-container")
                                     for(element in elements) {
@@ -291,6 +316,7 @@ class MainActivity : ComponentActivity() {
                                     intent.putExtra("homeBadge", homeBadge)
                                     intent.putExtra("awayBadge", awayBadge)
                                     intent.putExtra("score", score)
+                                    intent.putExtra("extraTimeOrPenalties", extraTimeOrPenalties)
                                     intent.putExtra("competition", competition)
                                     intent.putExtra("stage", stage)
                                     intent.putExtra("date", date)
@@ -381,7 +407,7 @@ class MainActivity : ComponentActivity() {
                                                     else
                                                         break
                                                 }
-                                                teamImage.add("https://tmssl.akamaized.net/images/wappen/normquad$imageUrl")
+                                                teamImage.add("https://tmssl.akamaized.net/images/wappen/big$imageUrl")
                                             }
                                         }
                                         counter ++
@@ -420,7 +446,7 @@ class MainActivity : ComponentActivity() {
                                                 else
                                                     break
                                             }
-                                            teamImage.add("https://tmssl.akamaized.net/images/wappen/normquad$imageUrl")
+                                            teamImage.add("https://tmssl.akamaized.net/images/wappen/big$imageUrl")
                                         }
                                     }
 
