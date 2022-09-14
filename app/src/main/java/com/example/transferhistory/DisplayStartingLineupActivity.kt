@@ -203,18 +203,32 @@ class DisplayStartingLineupActivity : ComponentActivity() {
                                 drawImage(
                                     image = ImageBitmap.imageResource(
                                         res = resources,
-                                        id = R.drawable.field
+                                        id = R.drawable.halffield
                                     )
                                 )
 
                                 drawCircle(
-                                    color = Color.Blue,
+                                    color = Color(
+                                        android.graphics.Color.parseColor(
+                                            if (selectedIndex.value == 0)
+                                                homeColor2
+                                            else
+                                                awayColor2
+                                        )
+                                    ),
                                     center = Offset(x = canvasWidth / 2, y = canvasHeight / 2),
                                     radius = 12.dp.toPx()
                                 )
 
                                 drawArc(
-                                    Color.Red,
+                                    color = Color(
+                                        android.graphics.Color.parseColor(
+                                            if (selectedIndex.value == 0)
+                                                homeColor1
+                                            else
+                                                awayColor1
+                                        )
+                                    ),
                                     startAngle = 180f,
                                     sweepAngle = 180f,
                                     useCenter = true,
@@ -225,72 +239,51 @@ class DisplayStartingLineupActivity : ComponentActivity() {
 
                             Spacer(modifier = Modifier.height(20.dp))
 
-                            if (selectedIndex.value == 0) {
-                                Row {
-                                    Button(
-                                        onClick = {
-                                            colorToChange = 1
-                                            setShowDialog(true)
-                                        },
-                                        modifier = Modifier
-                                            .size(50.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = Color(
-                                                android.graphics.Color.parseColor(
+                            Row {
+                                Button(
+                                    onClick = {
+                                        colorToChange =
+                                            if (selectedIndex.value == 0)
+                                                1
+                                            else
+                                                3
+                                        setShowDialog(true)
+                                    },
+                                    modifier = Modifier
+                                        .size(50.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        backgroundColor = Color(
+                                            android.graphics.Color.parseColor(
+                                                if (selectedIndex.value == 0)
                                                     homeColor1
-                                                )
-                                            )
-                                        )
-                                    ) {}
-                                    Button(
-                                        onClick = {
-                                            colorToChange = 2
-                                            setShowDialog(true)
-                                        },
-                                        modifier = Modifier
-                                            .size(50.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = Color(
-                                                android.graphics.Color.parseColor(
-                                                    homeColor2
-                                                )
-                                            )
-                                        )
-                                    ) {}
-                                }
-                            } else {
-                                Row {
-                                    Button(
-                                        onClick = {
-                                            colorToChange = 3
-                                            setShowDialog(true)
-                                        },
-                                        modifier = Modifier
-                                            .size(50.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = Color(
-                                                android.graphics.Color.parseColor(
+                                                else
                                                     awayColor1
-                                                )
                                             )
                                         )
-                                    ) {}
-                                    Button(
-                                        onClick = {
-                                            colorToChange = 4
-                                            setShowDialog(true)
-                                        },
-                                        modifier = Modifier
-                                            .size(50.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            backgroundColor = Color(
-                                                android.graphics.Color.parseColor(
+                                    )
+                                ) {}
+                                Button(
+                                    onClick = {
+                                        colorToChange =
+                                            if (selectedIndex.value == 0)
+                                                2
+                                            else
+                                                4
+                                        setShowDialog(true)
+                                    },
+                                    modifier = Modifier
+                                        .size(50.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        backgroundColor = Color(
+                                            android.graphics.Color.parseColor(
+                                                if (selectedIndex.value == 0)
+                                                    homeColor2
+                                                else
                                                     awayColor2
-                                                )
                                             )
                                         )
-                                    ) {}
-                                }
+                                    )
+                                ) {}
                             }
                         }
                     }
@@ -325,7 +318,7 @@ class DisplayStartingLineupActivity : ComponentActivity() {
                 showDialog,
                 setShowDialog,
                 onPositiveClick = {
-                    if(newColor.length == 6) {
+                    if(newColor.length == 7) {
                         when (colorToChange) {
                             1 -> homeColor1 = newColor
                             2 -> homeColor2 = newColor

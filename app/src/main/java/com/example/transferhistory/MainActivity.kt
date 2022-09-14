@@ -242,6 +242,13 @@ class MainActivity : ComponentActivity() {
                                         awayColor1 = elements2[0].attr("style").dropLast(1).drop(17)
                                         awayColor2 = elements2[1].attr("style").dropLast(1).drop(17)
                                     }
+
+                                    if(awayColor1 == "")
+                                        awayColor1 = "#FFFFFF"
+
+                                    if(awayColor2 == "")
+                                        awayColor2 = "#FFFFFF"
+
                                     var homeBadge = ""
                                     var awayBadge = ""
 
